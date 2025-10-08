@@ -1,13 +1,10 @@
 import logging
 import azure.functions as func
 
-bp = func.Blueprint()
+def main(myblob: func.InputStream):
+    logging.info(f"Processing blob: Name={myblob.name}, Size={myblob.length} bytes")
 
-@bp.function_name('AdditionalHTTPFunction')
-@bp.route(route="brandnewroute")
-def test_function(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
-    return func.HttpResponse(
-        "Wow hello this worked!!!",
-        status_code=200
-        )
+    blob_bytes = myblob.read()
+    summary = process_csv(blob_bytes)
+
+    logging.info(f"Processing completed. Summary: {summary}")
