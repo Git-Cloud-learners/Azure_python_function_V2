@@ -23,17 +23,40 @@ def test_function(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.function_name('SecondHTTPFunction')
 @app.route(route="newroute")
-def test_function(req: func.HttpRequest) -> func.HttpResponse:
+def second_http_function(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Starting the second HTTP Function request.')
-    
-    name = req.params.get('name')
-    if name:
-        message = f"Hello, {name}, so glad this Function worked!!"
-    else:
-        message = "Hello, so glad this Function worked!!"
+   
+    name = req.params.get('name', "")
+
+    # Input validation
+    if not name:
+        error = {"error": "Name cannot be empty"}
+        return func.HttpResponse(
+            json.dumps(error),
+            status_code=400,
+            mimetype="application/json"
+        )
+    if len(name) > 50:
+        error = {"error": "Name cannot exceed 50 characters"}
+        return func.HttpResponse(
+            json.dumps(error),
+            status_code=400,
+            mimetype="application/json"
+        )
+    if not name.isalnum():
+        error = {"error": "Name must be alphanumeric"}
+        return func.HttpResponse(
+            json.dumps(error),
+            status_code=400,
+            mimetype="application/json"
+        )
+
+    # If validation passes
+    message = {"message": f"Hello, {name}, so glad this Function worked!!"}
     return func.HttpResponse(
-        message,
-        status_code=200
+        json.dumps(message),
+        status_code=200,
+        mimetype="application/json"
     )
 
 
